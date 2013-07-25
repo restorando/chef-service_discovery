@@ -453,10 +453,56 @@ describe 'Service Discovery' do
     class Recipe < Struct.new(:node)
     end
 
+    let(:node) do
+      double
+    end
+
     let(:recipe) do
-      node = stub
       recipe = Recipe.new(node)
       recipe.extend ServiceDiscovery::DSL
+      recipe
+    end
+
+    describe 'announce_service' do
+      it 'is included in the recipe' do
+        recipe.respond_to?(:announce_service).should be_true
+      end
+
+      it 'delegates to a ServiceDiscovery instance' do
+        disco = double
+        ServiceDiscovery.should_receive(:new).with(node) { disco }
+        disco.should_receive(:announce_service)
+
+        recipe.announce_service("test-service", {})
+      end
+    end
+
+    describe 'discover_nodes_for' do
+      it 'is included in the recipe' do
+        recipe.respond_to?(:discover_nodes_for).should be_true
+      end
+
+      it 'delegates to a ServiceDiscovery instance' do
+        disco = double
+        ServiceDiscovery.should_receive(:new).with(node) { disco }
+        disco.should_receive(:discover_nodes_for)
+
+        recipe.discover_nodes_for("test-service", {})
+      end
+    end
+
+    describe 'discover_connection_endpoints_for' do
+      it 'is included in the recipe' do
+        recipe.respond_to?(:discover_connection_endpoints_for).should be_true
+      end
+
+      it 'delegates to a ServiceDiscovery instance' do
+        disco = double
+        ServiceDiscovery.should_receive(:new).with(node) { disco }
+        disco.should_receive(:discover_connection_endpoints_for)
+
+        recipe.discover_connection_endpoints_for("test-service", {})
+      end
     end
 
   end
