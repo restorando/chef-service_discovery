@@ -140,7 +140,7 @@ discover_connection_endpoints_for :rabbitmq, {
 Get a list of endpoints for the rabbitmq management interface:
 
 ```ruby
-discover_connection_endpoints for :rabbitmq, {
+discover_connection_endpoints_for :rabbitmq, {
   cluster: 'amqp01',
   require: { protocol: 'https', port: 15672 }
 }
