@@ -185,7 +185,7 @@ describe 'Service Discovery' do
           "announced_services_test_service_cluster:#{node['cluster']}"
         ].join(" AND ")
 
-        nodes = [node, double]
+        nodes = [node, double(name: 'test-double')]
         search_engine.should_receive(:search).with(:node, q).and_yield(nodes[0]).and_yield(nodes[1])
 
         resp = disco.discover_nodes_for(:test_service, exclude_self: true)

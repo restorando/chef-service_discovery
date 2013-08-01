@@ -34,7 +34,7 @@ class ServiceDiscovery
 
     results = Array.new
     search_engine.search(:node, query.join(" AND ")) do |n|
-      unless params[:exclude_self] && node == n
+      unless params[:exclude_self] && node.name == n.name
         yield n if block_given?
         results << n
       end
