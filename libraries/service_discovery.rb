@@ -96,7 +96,7 @@ class ServiceDiscovery
   end
 
   def guess_scope(remote_node)
-    return 'node' if node == remote_node
+    return 'node' if node.name == remote_node.name
 
     return 'private' if node['data_center'] != nil && node['data_center'] == remote_node['data_center']
 
