@@ -1,3 +1,4 @@
+name             "service_discovery"
 maintainer       "Restorando S.A."
 maintainer_email "ops@restorando.com"
 license          "MIT"
