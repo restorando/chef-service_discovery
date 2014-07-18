@@ -70,12 +70,16 @@ class ServiceDiscovery
     return unless n['announced_services'] && n['announced_services'][service.to_s]
 
     endpoints = [n['announced_services'][service.to_s]['listening_on']].flatten.compact.map { |l| symbolize_keys(l) }
+
     return if endpoints.empty?
 
     results = match_elements(endpoints, required, preferred)
+
+    # If no restriction was specified for scope, filter unreachable scopes
     unless required[:scope]
-      guessed_scope = guess_scope(n)
-      results.select! { |l| l[:scope] == guessed_scope }
+      min_scope = guess_scope(n)
+      results.select! {|l| compare_scopes(min_scope, l[:scope]) >= 0 }
+      results.sort! {|l1, l2| compare_scopes(l2[:scope], l1[:scope]) }
     end
 
     results.first
@@ -114,6 +118,23 @@ class ServiceDiscovery
     end
 
     'public'
+  end
+
+  def compare_scopes(scope, other)
+    return 0 if scope == other
+
+    case scope
+    when 'node'
+      return 1
+    when 'public'
+      return -1
+    else # 'private'
+      if other == 'public'
+        return 1
+      else # other == 'node'
+        return -1
+      end
+    end
   end
 
   def cloud_provider_for_node(node)
