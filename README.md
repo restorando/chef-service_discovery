@@ -86,7 +86,7 @@ announce_service :mysql_master, {
 
 ### Discovering services
 
-There are two DSL methods to discover services, `dicover_nodes_for` and `discover_connection_endpoints_for`.
+There are two DSL methods to discover services, `discover_nodes_for` and `discover_connection_endpoints_for`.
 
 `discover_nodes_for` gives you a list of nodes where the service you're looking for is running. It accepts two parameters, a service id and a hash of properties to scope the search. These properties are:
 
