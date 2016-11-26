@@ -69,6 +69,23 @@ describe 'Service Discovery' do
         node['announced_services']['test_service']['listening_on'][0].should == expected
       end
 
+      it 'announces a service specifying a url an a public host name' do
+        disco.announce_service(:test_service, {
+          listening_on: { url: 'mysql://some.host:3306', scope: 'public' }
+        })
+
+        node['announced_services']['test_service']['listening_on'].should have(1).item
+
+        expected = {
+          'address' => 'some.host',
+          'port' => 3306,
+          'socket_type' => 'tcp',
+          'scope' => 'public',
+          'protocol' => 'mysql'
+        }
+        node['announced_services']['test_service']['listening_on'][0].should == expected
+      end
+
       it 'announces a service listening on all interfaces' do
         addresses = {'node' => ['127.0.0.1'], 'private' => ['10.11.12.13'] }
         ip_finder.should_receive(:find_all) { addresses }
@@ -387,6 +404,7 @@ describe 'Service Discovery' do
         node.set['announced_services']['mysql_server'] = {
           cluster: 'core-db',
           listening_on: [
+            { protocol: 'mysql', address: 'some.host', port: 3306, scope: 'public', socket_type: 'tcp' },
             { protocol: 'mysql', address: '10.12.120.11', port: 3306, scope: 'private', socket_type: 'tcp' },
             { protocol: 'mysql', address: '127.0.0.1', port: 3306, scope: 'node', socket_type: 'tcp' },
             { protocol: 'mysql', address: '/var/lib/mysql.sock', scope: 'node', socket_type: 'unix' }
@@ -425,6 +443,19 @@ describe 'Service Discovery' do
         endpoints[0][:scope].should == 'node'
         endpoints.map{|e| e[:socket_type] == 'unix'}.all?.should be_true
         endpoints.map{|e| e[:protocol] == 'mysql'}.all?.should be_true
+      end
+
+      it 'discovers unix socket connection endpoint for service on local node' do
+        endpoints = disco.discover_connection_endpoints_for(:mysql_server, {
+          node: node,
+          require: { scope: 'public', protocol: 'mysql' }
+        })
+
+        endpoints.should have(1).item
+        endpoints[0][:scope].should == 'public'
+        endpoints.map{|e| e[:socket_type] == 'tcp'}.all?.should be_true
+        endpoints.map{|e| e[:protocol] == 'mysql'}.all?.should be_true
+        endpoints.map{|e| e[:address] == 'some.host'}.all?.should be_true
       end
 
       it 'discovers connection endpoints for a certain protocol' do
